@@ -58,8 +58,6 @@ class Client(Iface):
 
     def recv_Report(self):
         iprot = self._iprot
-        if iprot.trans.code != 200:
-            raise TApplicationException(TApplicationException, "Report failed: Received a server error")
         (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()

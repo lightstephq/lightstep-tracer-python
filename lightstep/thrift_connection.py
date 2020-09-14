@@ -4,6 +4,7 @@
 import threading
 from thrift import Thrift
 from thrift.transport import THttpClient
+from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from .crouton import ReportingService
 
@@ -21,6 +22,7 @@ class _ThriftConnection(object):
     def __init__(self, collector_url):
         self._collector_url = collector_url
         self._lock = threading.Lock()
+        self._http_client = None
         self._transport = None
         self._client = None
         self.ready = False
@@ -38,9 +40,10 @@ class _ThriftConnection(object):
         """
         self._lock.acquire()
         try:
-            self._transport = THttpClient.THttpClient(self._collector_url)
+            self._http_client = THttpClient.THttpClient(self._collector_url)
+            self._transport = TTransport.TBufferedTransport(self._http_client)
             self._transport.open()
-            protocol = TBinaryProtocol.TBinaryProtocol(self._transport)
+            protocol = TBinaryProtocol.TBinaryProtocolAccelerated(self._transport, fallback=True)
             self._client = ReportingService.Client(protocol)
         except Thrift.TException:
             self._open_exceptions_count += 1
@@ -61,7 +64,7 @@ class _ThriftConnection(object):
             try:
                 if self._client:
                     headers = {"Lightstep-Access-Token": args[0].access_token}
-                    self._transport.setCustomHeaders(headers)
+                    self._http_client.setCustomHeaders(headers)
                     resp = self._client.Report(*args, **kwargs)
                     self._report_consecutive_errors = 0
             except Thrift.TException:
