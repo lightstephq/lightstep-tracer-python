@@ -95,3 +95,7 @@ return lightstep.Tracer(
 ```
 
 This library is the LightStep binding for [OpenTracing](http://opentracing.io/). See the [OpenTracing Python API](https://github.com/opentracing/opentracing-python) for additional detail.
+
+## Testing
+
+The LightStep Python Tracer is performance tested in CI using [LightStep Benchmarks](https://github.com/lightstep/lightstep-benchmarks). Performance regression tests are run automatically every commit, and performance graphs can be generated with manual approval. **This repo will show a yellow dot for CI test status even when all of the automatic tests have run. Because LightStep Benchmarks performance graphs are only generated after manual approval and CircleCI counts them as "running" before they've been approved, you won't see a green status check mark unless you've manually approved performance graph generation.**
